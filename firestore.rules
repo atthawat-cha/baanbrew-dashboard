@@ -1,10 +1,45 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ทุกคนอ่านได้ แต่เขียนจากฝั่งเว็บไม่ได้ (เขียนผ่าน Admin/สคริปต์เท่านั้น)
-    match /{document=**} {
-      allow read: if true;
-      allow write: if false;
+
+    // ---- ข้อมูลสรุปของหน้าภาพรวมสาธารณะ (Lab 1-2): ทุกคนอ่านได้ แต่เขียนจากเว็บไม่ได้ ----
+    match /daily_sales/{id} { allow read: if true; allow write: if false; }
+    match /branches/{id}    { allow read: if true; allow write: if false; }
+    match /products/{id}    { allow read: if true; allow write: if false; }
+
+    // ---- ยอดขายรายรายการ (Lab 3) ----
+    match /sales/{id} {
+      // ต้องล็อกอินก่อนจึงอ่านได้
+      allow read: if request.auth != null;
+
+      // เพิ่มได้เมื่อล็อกอิน และข้อมูลต้องผ่านการตรวจทุกข้อใน validSale()
+      allow create: if request.auth != null
+                    && validSale(request.resource.data)
+                    && id == request.resource.data.order_id + '-' + request.resource.data.product_id;
+
+      // แก้ไขและลบจากหน้าเว็บไม่ได้เลย (ประวัติยอดขายต้องไม่ถูกเปลี่ยน)
+      allow update, delete: if false;
+    }
+
+    function validSale(d) {
+      return d.keys().hasOnly(['order_id', 'date', 'hour', 'branch', 'product_id', 'qty', 'unit_price',
+                               'revenue', 'customer_id', 'source', 'created_by', 'created_at'])
+          && d.keys().hasAll(['order_id', 'date', 'hour', 'branch', 'product_id', 'qty', 'unit_price',
+                              'revenue', 'source', 'created_by', 'created_at'])
+          && d.order_id is string && d.order_id.size() > 0 && d.order_id.size() <= 40
+          && d.product_id is string
+          && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && d.hour is int && d.hour >= 0 && d.hour <= 23
+          && d.branch in ['สยาม', 'สีลม', 'อารีย์', 'บางนา', 'มหาวิทยาลัย']
+          && d.qty is int && d.qty > 0 && d.qty <= 20
+          && d.unit_price is int && d.unit_price > 0
+          // ราคาต้องตรงกับราคาในเมนูจริง ห้ามแก้ราคาเองจากหน้าเว็บ
+          && d.unit_price == get(/databases/$(database)/documents/products/$(d.product_id)).data.price
+          && d.revenue == d.qty * d.unit_price
+          && (!('customer_id' in d) || d.customer_id == null || d.customer_id is string)
+          && d.source == 'web'
+          && d.created_by == request.auth.uid
+          && d.created_at == request.time;
     }
   }
 }

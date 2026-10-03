@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import Papa from 'papaparse';
 import { CartesianGrid, Legend, Line, LineChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import Customers from './Customers';
-import { fetchDailySales } from './lib/firebase';
+import Realtime from './Realtime';
+import { fetchDailySales, signInWithGoogle, signOutUser, watchAuth } from './lib/firebase';
 import { computeKpis, dailySales, salesByBranch, ordersByHour, fmtHour, fmtBaht, fmtNum, fmtThaiDate } from './lib/metrics';
 
 const BRANCH_COLORS = ['#7c2d12', '#0f766e', '#7c3aed', '#ca8a04', '#be185d'];
@@ -31,7 +32,7 @@ function Card({ title, children }) {
   );
 }
 
-export default function App() {
+function Overview() {
   const [rows, setRows] = useState(null);
   const [customers, setCustomers] = useState(null);
   const [branchList, setBranchList] = useState(null);
@@ -63,12 +64,11 @@ export default function App() {
   const hourly = useMemo(() => rows && ordersByHour(rows).filter((d) => d.hour >= 7 && d.hour <= 20), [rows]);
 
   return (
-    <main className="min-h-screen bg-stone-50 p-4 text-stone-900 sm:p-8">
-      <h1 className="text-2xl font-bold sm:text-3xl">บ้านบรู Dashboard</h1>
+    <div>
       {!rows ? (
         <p className="mt-6 text-stone-500">กำลังโหลดข้อมูล...</p>
       ) : (
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Kpi label="ยอดขายรวม" value={fmtBaht(kpis.revenue)} />
             <Kpi label="จำนวนบิล" value={fmtNum(kpis.orderCount)} />
@@ -146,6 +146,91 @@ export default function App() {
           {customers && branchList && <Customers customers={customers} branches={branchList} sales={rows} />}
         </div>
       )}
+    </div>
+  );
+}
+
+// ----- หน้าล็อกอินด้วย Google (Lab 3.3) -----
+function LoginGate() {
+  const [err, setErr] = useState(null);
+  const [busy, setBusy] = useState(false);
+  async function login() {
+    setBusy(true);
+    setErr(null);
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      setErr(e.code ?? e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const hint = {
+    'auth/operation-not-allowed': 'ยังไม่ได้เปิด Google provider ใน Firebase Console (Authentication → Sign-in method)',
+    'auth/unauthorized-domain': 'โดเมนนี้ยังไม่อยู่ใน Authorized domains (Authentication → Settings)',
+    'auth/popup-closed-by-user': 'ปิดหน้าต่างล็อกอินก่อนเสร็จ ลองใหม่อีกครั้ง',
+    'auth/configuration-not-found': 'ยังไม่ได้เปิดใช้ Firebase Authentication ในโปรเจกต์',
+  };
+  return (
+    <section className="mx-auto mt-8 max-w-md rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-stone-200">
+      <h2 className="text-lg font-bold">Dashboard แบบ real-time</h2>
+      <p className="mt-2 text-sm text-stone-600">
+        ข้อมูลยอดขายรายรายการและฟอร์มบันทึกยอดขายต้องเข้าสู่ระบบด้วยบัญชี Google ก่อน
+      </p>
+      <button onClick={login} disabled={busy}
+        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-stone-800 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50">
+        {busy ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
+      </button>
+      {err && <p role="alert" className="mt-4 text-sm text-red-700">{hint[err] ?? `เข้าสู่ระบบไม่สำเร็จ: ${err}`}</p>}
+    </section>
+  );
+}
+
+export default function App() {
+  const [tab, setTab] = useState(() => (window.location.hash === '#realtime' ? 'realtime' : 'overview'));
+  const [user, setUser] = useState(undefined); // undefined = ยังตรวจสถานะล็อกอินอยู่
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => watchAuth(setUser), []);
+  useEffect(() => {
+    Papa.parse('/products.csv', { download: true, header: true, skipEmptyLines: true, complete: (res) => setProducts(res.data) });
+  }, []);
+  useEffect(() => { window.location.hash = tab === 'realtime' ? 'realtime' : ''; }, [tab]);
+
+  const tabBtn = (id, label) => (
+    <button key={id} onClick={() => setTab(id)}
+      className={`rounded-lg px-3 py-1.5 text-sm font-medium ${tab === id ? 'bg-stone-800 text-white' : 'bg-white text-stone-600 ring-1 ring-stone-300'}`}>
+      {label}
+    </button>
+  );
+
+  return (
+    <main className="min-h-screen bg-stone-50 p-4 text-stone-900 sm:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold sm:text-3xl">บ้านบรู Dashboard</h1>
+        {user && (
+          <div className="flex items-center gap-2 text-sm text-stone-600">
+            {user.photoURL && <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-7 w-7 rounded-full" />}
+            <span>{user.displayName ?? user.email}</span>
+            <button onClick={signOutUser} className="rounded-lg px-2 py-1 ring-1 ring-stone-300">ออกจากระบบ</button>
+          </div>
+        )}
+      </div>
+      <nav className="mt-4 flex gap-2">
+        {tabBtn('overview', 'ภาพรวม')}
+        {tabBtn('realtime', 'Real-time + บันทึกยอดขาย')}
+      </nav>
+      <div className="mt-6">
+        {tab === 'overview' ? (
+          <Overview />
+        ) : user === undefined ? (
+          <p className="text-stone-500">กำลังตรวจสอบการเข้าสู่ระบบ...</p>
+        ) : user ? (
+          <Realtime user={user} products={products} />
+        ) : (
+          <LoginGate />
+        )}
+      </div>
     </main>
   );
 }

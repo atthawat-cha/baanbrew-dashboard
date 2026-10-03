@@ -40,3 +40,8 @@ dist
 .DS_Store
 .playwright-mcp
 .firebase
+
+# service account key ห้ามเข้า repo เด็ดขาด
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+*service-account*.json

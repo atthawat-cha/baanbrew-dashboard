@@ -27,7 +27,7 @@ export function computeKpis(rows) {
 export function dailySales(rows) {
   const byDay = new Map();
   for (const r of rows) {
-    const d = r.datetime.slice(0, 10);
+    const d = r.date ?? r.datetime.slice(0, 10); // r.date มาจาก Firestore
     byDay.set(d, (byDay.get(d) ?? 0) + lineTotal(r));
   }
   const days = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b));
@@ -65,7 +65,7 @@ export function ordersByHour(rows) {
   const total = Array.from({ length: 24 }, () => new Set());
   const perBranch = new Map(); // branch -> 24 Sets
   for (const r of rows) {
-    const h = Number(r.datetime.slice(11, 13));
+    const h = r.hour ?? Number(r.datetime.slice(11, 13)); // r.hour มาจาก Firestore
     total[h].add(r.order_id);
     if (!perBranch.has(r.branch)) perBranch.set(r.branch, Array.from({ length: 24 }, () => new Set()));
     perBranch.get(r.branch)[h].add(r.order_id);
