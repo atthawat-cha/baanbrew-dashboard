@@ -1,6 +1,6 @@
-# บ้านบรู Dashboard — งานส่ง Lab 1, การบ้านที่ 1 และการบ้านที่ 2
+# บ้านบรู Dashboard — งานส่ง Lab 1, การบ้านที่ 1, 2 และ 3
 
-Dashboard วิเคราะห์ยอดขายและลูกค้าของเครือร้านกาแฟ “บ้านบรู” (ข้อมูลจำลอง 5 สาขา 1 เม.ย. 2025 – 20 ก.ย. 2026) สร้างด้วย React + Vite + Tailwind CSS + Recharts และใช้ AI (Claude Code) ช่วยเขียนโค้ด
+Dashboard วิเคราะห์ยอดขายและลูกค้าของเครือร้านกาแฟ “บ้านบรู” (ข้อมูลจำลอง 5 สาขา 1 เม.ย. 2025 – 20 ก.ย. 2026) สร้างด้วย React + Vite + Tailwind CSS + Recharts + Firebase (Firestore, Authentication, Hosting) และใช้ AI (Claude Code) ช่วยเขียนโค้ด
 
 **ผู้ส่ง:** atthawat-cha (atthawat.cha@mfu.ac.th) · วิชา Basic Data Analytics & Visualization using AI Vibe Coding (ADT-RAISE Non-Degree Batch 2, โมดูล 3)
 
@@ -13,12 +13,14 @@ Dashboard วิเคราะห์ยอดขายและลูกค้�
 | **Lab 1** · Dashboard แรก | เว็บ Dashboard (KPI 4 ใบ, กราฟเส้นยอดขายรายวัน, กราฟแท่งยอดขายแยกสาขา) + หลักฐานตรวจตัวเลข + โค้ดบน GitHub | เว็บ: **https://baanbrew.web.app** · โค้ด: https://github.com/atthawat-cha/baanbrew-dashboard · หลักฐาน: [`homework/lab1/m3-hw1.png`](homework/lab1/m3-hw1.png) |
 | **การบ้านที่ 1** · ต่อจาก Lab 1 | กราฟ “จำนวนบิลตามชั่วโมงของวัน” (รวม / แยกสาขา) พร้อมข้อสังเกต 3 ข้อ | อยู่ในหน้าเว็บเดียวกัน (การ์ดที่ 2 ต่อจากกราฟรายวัน) |
 | **การบ้านที่ 2** · ต่อยอด Lab 2.1 | (1) ไฟล์ Colab ทำ Data Profiling `customers.csv` (2) เว็บที่เพิ่มการแสดงผลข้อมูลลูกค้า | (1) [`notebooks/Lab2_1_Customers_Profiling.ipynb`](notebooks/Lab2_1_Customers_Profiling.ipynb) · [เปิดใน Colab](https://colab.research.google.com/github/atthawat-cha/baanbrew-dashboard/blob/main/notebooks/Lab2_1_Customers_Profiling.ipynb) (2) ส่วน **“ลูกค้าสมาชิก”** ท้ายหน้า https://baanbrew.web.app |
+| **การบ้านที่ 3** · Lab 3.1–3.3 (Firebase) | (3.1) นำข้อมูลยอดขายเข้า Firestore (3.2) Dashboard แบบ real-time + ฟอร์มบันทึกยอดขาย (3.3) Login ด้วย Google + Security Rules + ขึ้นเว็บ | แท็บ **“Real-time + บันทึกยอดขาย”** ที่ https://baanbrew.web.app/#realtime (ต้องล็อกอินด้วยบัญชี Google ใดก็ได้) · กฎ: [`firestore.rules`](firestore.rules) · สคริปต์: [`scripts/`](scripts) |
 
-> **ลิงก์เว็บที่ใช้ตรวจ:** https://baanbrew.web.app (เลื่อนลงล่างสุดเพื่อดูส่วนลูกค้าของการบ้านที่ 2) ถ้าเห็นหน้าเก่า กด Ctrl+Shift+R เพราะเบราว์เซอร์อาจแคชไว้ไม่เกิน 1 ชั่วโมง
+> **ลิงก์เว็บที่ใช้ตรวจ:** https://baanbrew.web.app — แท็บ “ภาพรวม” (Lab 1, การบ้านที่ 1–2; เลื่อนลงล่างสุดเพื่อดูส่วนลูกค้า) เปิดดูได้ทันที ส่วนแท็บ “Real-time + บันทึกยอดขาย” (การบ้านที่ 3) ต้อง **เข้าสู่ระบบด้วย Google** ก่อนตามที่โจทย์กำหนด ใช้บัญชี Google ใดก็ได้ ถ้าเห็นหน้าเก่า กด Ctrl+Shift+R เพราะเบราว์เซอร์อาจแคชไว้ไม่เกิน 1 ชั่วโมง
 
 ### หมายเหตุที่ควรทราบ
 - **หลักฐานตรวจตัวเลข (Lab 1):** ภาพ `m3-hw1.png` เทียบ Dashboard กับไฟล์ Excel ที่ใช้สูตร `SUMIFS` (ไม่ใช่ PivotTable จริง) ตัวเลขตรงกันทุกค่า ถ้าต้องการ PivotTable จริงสามารถทำเพิ่มได้
 - **การบ้านที่ 2:** ผล Profiling พบว่าข้อมูลลูกค้า *สะอาดเชิงโครงสร้าง* จึงไม่ลบแถวใด เลือก “ติดธง” จุดที่น่าสงสัยแทน (รายละเอียดด้านล่าง) สมุด Colab รันครบทุกเซลล์บนเครื่องแล้ว และเปิดดูผลลัพธ์ในไฟล์ได้เลยโดยไม่ต้องรันใหม่
+- **การบ้านที่ 3:** ผมเลือกซ่อน *เฉพาะแท็บ Real-time* หลังล็อกอิน (ตาม Lab 3.3) แต่ให้แท็บ “ภาพรวม” เปิดสาธารณะ เพื่อให้ตรวจงาน Lab 1–2 ได้โดยไม่ต้องล็อกอิน · การเขียนยอดขายผ่านฟอร์มจะ **เพิ่มข้อมูลจริงลง Firestore** (แก้/ลบจากหน้าเว็บไม่ได้) รายการที่เพิ่มจะมีป้ายรหัส `WEB-...` และ `source = web`
 - **การใช้ AI:** โค้ดส่วนใหญ่และสมุด Colab เขียนร่วมกับ AI ตัวเลขทุกค่าตรวจซ้ำกับการคำนวณอิสระ (Python/Excel) ส่วนการตัดสินใจเรื่องการจัดการข้อมูลและข้อสังเกตจากกราฟเป็นของผู้ส่ง
 
 ---
@@ -59,11 +61,42 @@ Dashboard วิเคราะห์ยอดขายและลูกค้�
 
 ---
 
+### การบ้านที่ 3 · Firebase: ฐานข้อมูล, real-time, login
+**Lab 3.1 นำข้อมูลเข้า** — สร้างโปรเจกต์ Firebase `baanbrew` และ Firestore แล้วนำเข้า collection `sales` **9,939 เอกสาร** (3 เดือนล่าสุด 21 มิ.ย.–20 ก.ย. 2026) ด้วย [`scripts/seed-sales.mjs`](scripts/seed-sales.mjs) (เพิ่ม field `date`, `hour`, `revenue`; เขียนทีละ batch ไม่เกิน 500; document id = `order_id-product_id` รันซ้ำได้ไม่เกิดข้อมูลซ้ำ) สคริปต์ใช้บัญชีที่ `firebase login` ไว้แทนไฟล์ service account key จึงไม่มี key อยู่ใน repo
+
+| ตรวจจำนวนเอกสาร | Firestore | ไฟล์ต้นฉบับ |
+|---|---|---|
+| จำนวนเอกสาร `sales` | 9,939 | 9,939 |
+| ผลรวม `revenue` | ฿847,892 | ฿847,892 |
+
+**Lab 3.2 Dashboard แบบ real-time** — อ่านจาก Firestore ด้วย `onSnapshot` (เลิกฟังเมื่อเปลี่ยนช่วงวันที่/ออกจากหน้า) มีตัวกรองช่วงวันที่และสาขา, KPI, กราฟยอดขายรายวัน/สาขา/บิลตามชั่วโมง, สถานะกำลังโหลด และข้อความเมื่อไม่มีข้อมูล พร้อมฟอร์ม “บันทึกยอดขาย” (สาขา, เมนู, จำนวน; ราคาใส่อัตโนมัติจาก `products.csv`) ถ้ามีผู้ใช้อื่นบันทึกยอดขาย กราฟจะอัปเดตเอง (ตัวบอก “อัปเดตสดล่าสุด” ที่มุมขวาของแถบตัวกรอง)
+
+**Lab 3.3 Login, Security Rules, ขึ้นเว็บ** — ล็อกอินด้วย Google (Firebase Authentication) และ deploy ด้วย Firebase Hosting ที่ https://baanbrew.web.app
+
+Security Rules ([`firestore.rules`](firestore.rules)) สำหรับ `sales`: ต้องล็อกอินจึงอ่านได้ · เพิ่มได้เมื่อข้อมูลผ่านการตรวจ · **แก้และลบไม่ได้เลย** การตรวจตอนเพิ่มเข้มกว่าขั้นต่ำของโจทย์ (`qty > 0`): `qty` เป็นจำนวนเต็ม 1–20, **ราคาต้องตรงกับราคาเมนูใน `products`** (ห้ามแก้ราคาเองจากหน้าเว็บ), `revenue = qty × ราคา`, สาขาต้องอยู่ในรายชื่อ, `created_by` ต้องเป็น uid ของผู้ล็อกอิน, ห้ามมี field เกิน
+
+ผมทดสอบกฎด้วย [`scripts/test-rules.mjs`](scripts/test-rules.mjs) **21 กรณีผ่านทั้งหมด** เช่น
+
+| ลองทำ | ผล |
+|---|---|
+| อ่าน `sales` โดยไม่ล็อกอิน | ❌ ปฏิเสธ |
+| เพิ่มยอดขายถูกต้องตอนล็อกอิน | ✅ อนุญาต |
+| `qty = -5`, `qty = 0`, `qty = 999` | ❌ ปฏิเสธ |
+| แก้ราคาเอง (`unit_price = 1`) / `revenue` ไม่ตรง | ❌ ปฏิเสธ |
+| ปลอม `created_by` เป็นคนอื่น / แอบใส่ field เกิน | ❌ ปฏิเสธ |
+| แก้ไขหรือลบเอกสารเดิม | ❌ ปฏิเสธ |
+| อ่าน `daily_sales` (ข้อมูลสรุปสาธารณะ) | ✅ อนุญาต แต่เขียนไม่ได้ |
+
+**สิ่งที่ตรวจแล้วบนเว็บจริง:** ปุ่ม “เข้าสู่ระบบด้วย Google” เปิดหน้าต่างล็อกอินของ Google ได้ และเนื้อหาแท็บ Real-time ถูกซ่อนไว้จนกว่าจะล็อกอิน · **หมายเหตุ:** ส่วนหลังล็อกอิน (กราฟและฟอร์ม) ต้องใช้บัญชี Google จึงจะเห็น กรุณาทดสอบด้วยบัญชีของท่านได้เลย
+
+---
+
 ## 🛠️ รันบนเครื่อง
 
 ต้องมี Node.js 20 ขึ้นไป (`node -v`)
 
 ```bash
+cp .env.example .env   # แล้วใส่ค่า VITE_FIREBASE_* ของโปรเจกต์ (ดูใน Firebase Console > Project settings)
 npm install
 npm run dev        # เปิด http://localhost:5173
 npm run build      # สร้างโฟลเดอร์ dist
@@ -82,18 +115,25 @@ src/
   App.jsx                  หน้า Dashboard (Lab 1 + การบ้านที่ 1)
   Customers.jsx            ส่วนลูกค้าสมาชิก (การบ้านที่ 2)
   lib/metrics.js           logic คำนวณทั้งหมด (แยกจาก UI)
-  lib/firebase.js          เชื่อม Firebase / Firestore
+  Realtime.jsx             แท็บ Real-time + ฟอร์มบันทึกยอดขาย (การบ้านที่ 3)
+  lib/firebase.js          เชื่อม Firebase: Firestore, onSnapshot, Auth (Google)
 notebooks/
   Lab2_1_Customers_Profiling.ipynb   ไฟล์ Colab ของการบ้านที่ 2
   customers_cleaning_log.csv         บันทึกขั้นตอนทำความสะอาด
 homework/lab1/m3-hw1.png   หลักฐานตรวจตัวเลขกับ Excel
-scripts/seed-firestore.mjs สคริปต์อัปโหลดข้อมูลสรุปขึ้น Firestore
+scripts/seed-firestore.mjs สคริปต์อัปโหลดข้อมูลสรุป (daily_sales, branches, products)
+scripts/seed-sales.mjs     Lab 3.1: นำเข้า sales 3 เดือนล่าสุด
+scripts/test-rules.mjs     ทดสอบ Security Rules 21 กรณี
+firestore.rules            Security Rules
+firebase.json              ตั้งค่า Hosting + Firestore
+.env.example               แบบฟอร์มค่า config (ไฟล์ .env จริงไม่อยู่ใน repo)
 ```
 
-## ☁️ Firebase (เพิ่มเติมนอกโจทย์)
-- **Hosting:** deploy เว็บที่ https://baanbrew.web.app (`npm run build` แล้ว `npx firebase-tools deploy --only hosting`)
-- **Firestore:** เก็บข้อมูลสรุป (`branches` 5, `products` 40, `daily_sales` 538 เอกสาร) กราฟยอดขายรายวันอ่านจาก Firestore และถ้าโหลดไม่ได้จะใช้ข้อมูลจาก CSV แทน Security Rules ให้ทุกคนอ่านได้แต่เขียนจากเว็บไม่ได้
-- Firebase web config เป็นข้อมูลสาธารณะของแอป ความปลอดภัยอยู่ที่ Security Rules
+## ☁️ Firebase: สรุปการใช้งาน
+- **Hosting:** deploy ที่ https://baanbrew.web.app (`npm run build` แล้ว `npx firebase-tools deploy --only hosting`)
+- **Firestore:** `sales` 9,939 เอกสาร (การบ้านที่ 3, ต้องล็อกอินจึงอ่านได้) และข้อมูลสรุปสาธารณะ `daily_sales` 538 / `branches` 5 / `products` 40 เอกสาร (อ่านได้ทุกคน เขียนจากเว็บไม่ได้) กราฟยอดขายรายวันในแท็บ “ภาพรวม” อ่านจาก `daily_sales` และถ้าโหลดไม่ได้จะใช้ข้อมูลจาก CSV แทน
+- **Authentication:** ล็อกอินด้วย Google
+- **ความลับ:** Firebase web config (`apiKey`, `projectId` ฯลฯ) เป็นเพียง “ที่อยู่” ของโปรเจกต์ เก็บใน `.env` เพื่อเปลี่ยนโปรเจกต์ง่าย ความปลอดภัยจริงมาจาก Security Rules ส่วน service account key **ไม่ได้ใช้และไม่มีใน repo** (กันไว้ใน `.gitignore`)
 
 ## ข้อควรรู้เกี่ยวกับข้อมูล
 - 1 แถวใน `sales.csv` = 1 รายการสินค้า (บิลหนึ่งมีได้หลายแถว) · ยอดขาย = `qty × unit_price` · `customer_id` ว่าง = ลูกค้าทั่วไป ไม่ใช่สมาชิก
