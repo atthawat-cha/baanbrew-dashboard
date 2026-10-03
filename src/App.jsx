@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Papa from 'papaparse';
 import { CartesianGrid, Legend, Line, LineChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import Customers from './Customers';
 import { fetchDailySales } from './lib/firebase';
 import { computeKpis, dailySales, salesByBranch, ordersByHour, fmtHour, fmtBaht, fmtNum, fmtThaiDate } from './lib/metrics';
 
@@ -32,6 +33,8 @@ function Card({ title, children }) {
 
 export default function App() {
   const [rows, setRows] = useState(null);
+  const [customers, setCustomers] = useState(null);
+  const [branchList, setBranchList] = useState(null);
   const [byBranch, setByBranch] = useState(false);
   const [fsDaily, setFsDaily] = useState(null); // ยอดรายวันจาก Firestore (ถ้าโหลดไม่ได้ใช้ค่าจาก CSV)
 
@@ -41,6 +44,13 @@ export default function App() {
       complete: (res) =>
         setRows(res.data.map((r) => ({ ...r, qty: Number(r.qty), unit_price: Number(r.unit_price) }))),
     });
+  }, []);
+
+  useEffect(() => {
+    const load = (url, set) =>
+      Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: (res) => set(res.data) });
+    load('/customers_clean.csv', setCustomers);
+    load('/branches.csv', setBranchList);
   }, []);
 
   useEffect(() => {
@@ -132,6 +142,8 @@ export default function App() {
               </BarChart>
             </ResponsiveContainer>
           </Card>
+
+          {customers && branchList && <Customers customers={customers} branches={branchList} sales={rows} />}
         </div>
       )}
     </main>

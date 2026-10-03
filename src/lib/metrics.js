@@ -78,3 +78,82 @@ export function ordersByHour(rows) {
 }
 
 export const fmtHour = (h) => `${String(h).padStart(2, '0')}:00`;
+
+// ===================== ลูกค้า (customers_clean.csv) =====================
+export const AGE_ORDER = ['ต่ำกว่า 18', '18-24', '25-34', '35-44', '45-54', '55+'];
+
+// นับจำนวนตามค่าของคอลัมน์ (เรียงตาม order ถ้าระบุ ไม่งั้นมาก -> น้อย)
+export function countBy(rows, key, order) {
+  const m = new Map();
+  for (const r of rows) m.set(r[key], (m.get(r[key]) ?? 0) + 1);
+  const out = [...m.entries()].map(([name, count]) => ({ name, count }));
+  return order
+    ? order.map((name) => ({ name, count: m.get(name) ?? 0 }))
+    : out.sort((a, b) => b.count - a.count);
+}
+
+// สมาชิกสมัครใหม่รายเดือน + จำนวนสะสม
+export function joinedByMonth(customers) {
+  const m = new Map();
+  for (const c of customers) {
+    const k = c.joined_date.slice(0, 7);
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  let total = 0;
+  return [...m.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, count]) => ({ month, count, cumulative: (total += count) }));
+}
+
+// เชื่อมสมาชิกกับยอดขาย: ยอด/จำนวนบิลต่อ customer_id
+function spendByCustomer(salesRows) {
+  const m = new Map();
+  for (const r of salesRows) {
+    if (!r.customer_id) continue;
+    const e = m.get(r.customer_id) ?? { revenue: 0, orders: new Set() };
+    e.revenue += lineTotal(r);
+    e.orders.add(r.order_id);
+    m.set(r.customer_id, e);
+  }
+  return m;
+}
+
+// KPI ลูกค้า: สมาชิกทั้งหมด, สมาชิกที่เคยซื้อ, ยอดเฉลี่ยต่อสมาชิกที่ซื้อ, สัดส่วนยอดขายจากสมาชิก
+export function customerKpis(customers, salesRows) {
+  const spend = spendByCustomer(salesRows);
+  const ids = new Set(customers.map((c) => c.customer_id));
+  let memberRevenue = 0;
+  let buyers = 0;
+  for (const [id, e] of spend) if (ids.has(id)) { memberRevenue += e.revenue; buyers += 1; }
+  const totalRevenue = salesRows.reduce((s, r) => s + lineTotal(r), 0);
+  return {
+    members: customers.length,
+    buyers,
+    buyerRate: customers.length ? buyers / customers.length : 0,
+    avgPerBuyer: buyers ? memberRevenue / buyers : 0,
+    memberShare: totalRevenue ? memberRevenue / totalRevenue : 0,
+    neverBought: customers.length - buyers,
+  };
+}
+
+// ยอดซื้อเฉลี่ยต่อสมาชิก (ที่เคยซื้อ) แยกกลุ่มอายุ
+export function spendByAgeGroup(customers, salesRows) {
+  const spend = spendByCustomer(salesRows);
+  const agg = new Map(AGE_ORDER.map((a) => [a, { revenue: 0, buyers: 0 }]));
+  for (const c of customers) {
+    const e = spend.get(c.customer_id);
+    if (!e) continue;
+    const a = agg.get(c.age_group);
+    a.revenue += e.revenue;
+    a.buyers += 1;
+  }
+  return AGE_ORDER.map((name) => ({ name, avg: agg.get(name).buyers ? Math.round(agg.get(name).revenue / agg.get(name).buyers) : 0, buyers: agg.get(name).buyers }));
+}
+
+export const fmtPct = (x) => `${(x * 100).toFixed(1)}%`;
+const TH_MONTHS_FULL = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+// '2025-04' -> 'เม.ย. 68'
+export const fmtThaiMonth = (ym) => {
+  const [y, m] = ym.split('-').map(Number);
+  return `${TH_MONTHS_FULL[m - 1]} ${String(y + 543).slice(-2)}`;
+};
