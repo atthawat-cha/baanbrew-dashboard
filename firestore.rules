@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ทุกคนอ่านได้ แต่เขียนจากฝั่งเว็บไม่ได้ (เขียนผ่าน Admin/สคริปต์เท่านั้น)
+    match /{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

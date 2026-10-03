@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Papa from 'papaparse';
 import { CartesianGrid, Legend, Line, LineChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { fetchDailySales } from './lib/firebase';
 import { computeKpis, dailySales, salesByBranch, ordersByHour, fmtHour, fmtBaht, fmtNum, fmtThaiDate } from './lib/metrics';
 
 const BRANCH_COLORS = ['#7c2d12', '#0f766e', '#7c3aed', '#ca8a04', '#be185d'];
@@ -32,6 +33,7 @@ function Card({ title, children }) {
 export default function App() {
   const [rows, setRows] = useState(null);
   const [byBranch, setByBranch] = useState(false);
+  const [fsDaily, setFsDaily] = useState(null); // ยอดรายวันจาก Firestore (ถ้าโหลดไม่ได้ใช้ค่าจาก CSV)
 
   useEffect(() => {
     Papa.parse('/sales.csv', {
@@ -39,6 +41,10 @@ export default function App() {
       complete: (res) =>
         setRows(res.data.map((r) => ({ ...r, qty: Number(r.qty), unit_price: Number(r.unit_price) }))),
     });
+  }, []);
+
+  useEffect(() => {
+    fetchDailySales().then(setFsDaily).catch((e) => console.warn('Firestore ใช้ไม่ได้ ใช้ข้อมูลจาก CSV แทน', e));
   }, []);
 
   const kpis = useMemo(() => rows && computeKpis(rows), [rows]);
@@ -62,7 +68,7 @@ export default function App() {
 
           <Card title="ยอดขายรายวัน">
             <ResponsiveContainer>
-              <LineChart data={daily} margin={{ left: 0, right: 8 }}>
+              <LineChart data={fsDaily ?? daily} margin={{ left: 0, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                 <XAxis dataKey="date" tickFormatter={fmtThaiDate} minTickGap={40} fontSize={12} />
                 <YAxis tickFormatter={fmtNum} width={56} fontSize={12} />
